@@ -1,23 +1,20 @@
-import Navbar from "./components/screen/navbar";
-import TableView from "./components/screen/tableView";
-const App = () => {
-    const sendMessageToBackground = () => {
-        chrome.runtime.sendMessage({ action: "getRequests" }, (response) => {
-            const requestsDiv = document.getElementById("requests");
-            if (requestsDiv)
-                requestsDiv.textContent = JSON.stringify(response, null, 2);
-        });
-    };
+import InitialScreen from "./components/screen/initialScreen";
 
+import Network from "./components/screen/Network";
+
+import { MemoryRouter as Router, Routes, Route } from "react-router-dom";
+const App = () => {
+    // useEffect(() => {
+    //     chrome.runtime.sendMessage({ action: "openInNewTab" });
+    // }, []);
     return (
         <div className="flex justify-center ">
-            <div className="max-w-4xl w-full flex flex-col justify-center items-center pt-6">
-                <Navbar />
-                {/* <p className="text-sm font-medium text-left">
-                    All Networks Calls
-                </p> */}
-                <TableView />
-            </div>
+            <Router>
+                <Routes>
+                    <Route path="/" element={<InitialScreen />} />
+                    <Route path="/network" element={<Network />} />
+                </Routes>
+            </Router>
         </div>
     );
 };

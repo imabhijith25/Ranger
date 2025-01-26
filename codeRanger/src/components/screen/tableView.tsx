@@ -12,14 +12,20 @@ import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-
-import { Button } from "../ui/button";
+import { useEffect, useState } from "react";
 const TableView = () => {
+    const [responseList, setResponseList] = useState<any[]>([]);
+    useEffect(() => {
+        chrome.runtime.onMessage.addListener((message) => {
+            if (message.action == "incomingRequest") {
+                setResponseList([...message.detail]);
+            }
+        });
+    }, []);
+
     return (
         <div className="mt-8 w-full">
             <Input placeholder="Search for network calls" />
@@ -35,102 +41,34 @@ const TableView = () => {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    <TableRow>
-                        <TableCell className="font-medium text-green-500">
-                            200 OK
-                        </TableCell>
-                        <TableCell>GET</TableCell>
-                        <TableCell>
-                            https://google.com/cdn/2002/2334ndsuyfh&65gsdu
-                        </TableCell>
-                        <TableCell className="flex justify-end">
-                            <DropdownMenu>
-                                <DropdownMenuTrigger>
-                                    <Waypoints size={"20"} />
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent>
-                                    <DropdownMenuItem>Mock</DropdownMenuItem>
-                                    <DropdownMenuItem>Share</DropdownMenuItem>
+                    {responseList.map((item: any) => (
+                        <TableRow>
+                            <TableCell className="font-medium text-green-500">
+                                {item.statusCode}
+                            </TableCell>
+                            <TableCell>{item?.method}</TableCell>
+                            <TableCell>{item.url}</TableCell>
+                            <TableCell className="flex justify-end">
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger>
+                                        <Waypoints size={"20"} />
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent>
+                                        <DropdownMenuItem>
+                                            Mock
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem>
+                                            Share
+                                        </DropdownMenuItem>
 
-                                    <DropdownMenuItem>
-                                        Mark As Important
-                                    </DropdownMenuItem>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-                        </TableCell>
-                    </TableRow>
-                    <TableRow>
-                        <TableCell className="font-medium text-green-500">
-                            200 OK
-                        </TableCell>
-                        <TableCell>GET</TableCell>
-                        <TableCell>
-                            https://google.com/cdn/2002/2334ndsuyfh&65gsdu
-                        </TableCell>
-                        <TableCell className="flex justify-end">
-                            <DropdownMenu>
-                                <DropdownMenuTrigger>
-                                    <Waypoints size={"20"} />
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent>
-                                    <DropdownMenuItem>Mock</DropdownMenuItem>
-                                    <DropdownMenuItem>Share</DropdownMenuItem>
-
-                                    <DropdownMenuItem>
-                                        Mark As Important
-                                    </DropdownMenuItem>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-                        </TableCell>
-                    </TableRow>
-                    <TableRow>
-                        <TableCell className="font-medium text-green-500">
-                            200 OK
-                        </TableCell>
-                        <TableCell>GET</TableCell>
-                        <TableCell>
-                            https://google.com/cdn/2002/2334ndsuyfh&65gsdu
-                        </TableCell>
-                        <TableCell className="flex justify-end">
-                            <DropdownMenu>
-                                <DropdownMenuTrigger>
-                                    <Waypoints size={"20"} />
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent>
-                                    <DropdownMenuItem>Mock</DropdownMenuItem>
-                                    <DropdownMenuItem>Share</DropdownMenuItem>
-
-                                    <DropdownMenuItem>
-                                        Mark As Important
-                                    </DropdownMenuItem>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-                        </TableCell>
-                    </TableRow>
-                    <TableRow>
-                        <TableCell className="font-medium text-green-500">
-                            200 OK
-                        </TableCell>
-                        <TableCell>GET</TableCell>
-                        <TableCell>
-                            https://google.com/cdn/2002/2334ndsuyfh&65gsdu
-                        </TableCell>
-                        <TableCell className="flex justify-end">
-                            <DropdownMenu>
-                                <DropdownMenuTrigger>
-                                    <Waypoints size={"20"} />
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent>
-                                    <DropdownMenuItem>Mock</DropdownMenuItem>
-                                    <DropdownMenuItem>Share</DropdownMenuItem>
-
-                                    <DropdownMenuItem>
-                                        Mark As Important
-                                    </DropdownMenuItem>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-                        </TableCell>
-                    </TableRow>
+                                        <DropdownMenuItem>
+                                            Mark As Important
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            </TableCell>
+                        </TableRow>
+                    ))}
                 </TableBody>
             </Table>
         </div>
