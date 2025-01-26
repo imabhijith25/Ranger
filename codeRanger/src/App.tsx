@@ -2,13 +2,16 @@ import InitialScreen from "./components/screen/initialScreen";
 
 import Network from "./components/screen/Network";
 
-import { MemoryRouter as Router, Routes, Route } from "react-router-dom";
+import {
+    MemoryRouter as Router,
+    Routes,
+    Route,
+    // useLocation,
+    // useNavigate,
+} from "react-router-dom";
 const App = () => {
-    // useEffect(() => {
-    //     chrome.runtime.sendMessage({ action: "openInNewTab" });
-    // }, []);
     return (
-        <div className="flex justify-center ">
+        <div className="flex justify-center">
             <Router>
                 <Routes>
                     <Route path="/" element={<InitialScreen />} />

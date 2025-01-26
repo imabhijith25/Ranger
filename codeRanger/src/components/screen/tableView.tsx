@@ -41,13 +41,13 @@ const TableView = () => {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {responseList.map((item: any) => (
+                    {responseList.reverse().map((item: any) => (
                         <TableRow>
                             <TableCell className="font-medium text-green-500">
                                 {item.statusCode}
                             </TableCell>
                             <TableCell>{item?.method}</TableCell>
-                            <TableCell>{item.url}</TableCell>
+                            <TableCell>{item.url?.slice(0, 70)}..</TableCell>
                             <TableCell className="flex justify-end">
                                 <DropdownMenu>
                                     <DropdownMenuTrigger>

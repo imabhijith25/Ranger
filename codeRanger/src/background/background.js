@@ -29,7 +29,11 @@ const addListenerForIncomingRequest = (tabId) => {
         { urls: ["<all_urls>"] } // Capture requests from all URLs
     );
 
-    chrome.tabs.create({ url: "/index.html" });
+    chrome.tabs.create({ url: "/index.html?start='true'" }).then((result) => {
+        if (result.active) {
+            console.log("new tab created");
+        }
+    });
 };
 
 const getCurrentTabId = () => {
