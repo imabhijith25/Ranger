@@ -1,3 +1,5 @@
+import { getDataFromLocalStorage, injectMockScript } from "./utils";
+
 let capturedRequests = [];
 
 const addListenerForIncomingRequest = (tabId) => {
@@ -5,18 +7,18 @@ const addListenerForIncomingRequest = (tabId) => {
 
     chrome.webRequest.onCompleted.addListener(
         (details) => {
-            console.log("Captured Request:", details);
-
             // Save the request details
-            capturedRequests.push({
-                url: details.url,
-                method: details.method,
-                statusCode: details.statusCode,
-                type: details.type,
-                timestamp: new Date().toISOString(),
-            });
+
             chrome.storage.local.get("tabId").then((result) => {
                 console.log(result.tabId);
+                // console.log("Captured Request:", details);
+                capturedRequests.push({
+                    url: details.url,
+                    method: details.method,
+                    statusCode: details.statusCode,
+                    type: details.type,
+                    timestamp: new Date().toISOString(),
+                });
                 if (result.tabId == details.tabId) {
                     console.log("sending message");
                     chrome.runtime.sendMessage({
@@ -58,5 +60,17 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
         chrome.storage.local.set({ tabId: currentTabId }).then((result) => {
             addListenerForIncomingRequest(currentTabId);
         });
+    }
+    //jayikandeda myrukale
+    if (message.action == "save_mock") {
+        //this can only do one at a time, so be careful
+        chrome.storage.local.set(
+            { mocks: message.data, startIntercepting: true },
+            async function () {
+                console.log("Mock saved to local storage");
+                const tabId = await getDataFromLocalStorage("tabId");
+                injectMockScript(tabId);
+            }
+        );
     }
 });

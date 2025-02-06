@@ -13,7 +13,7 @@
 
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  background-color: #181818;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -21,7 +21,14 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-
+/* 
+.monaco-editor,
+.monaco-editor-background,
+.margin-view-overlays,
+.minimap-decorations-layer,
+.decorationsOverviewRuler {
+  background-color: #1e1e1e !important;
+} */
 
 @layer base {
   :root {

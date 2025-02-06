@@ -1,5 +1,5 @@
+import MockScreen from "./components/screen/mockScreen";
 import InitialScreen from "./components/screen/initialScreen";
-
 import Network from "./components/screen/Network";
 
 import {
@@ -14,6 +14,7 @@ const App = () => {
         <div className="flex justify-center">
             <Router>
                 <Routes>
+                    <Route path="/mock" element={<MockScreen />} />
                     <Route path="/" element={<InitialScreen />} />
                     <Route path="/network" element={<Network />} />
                 </Routes>

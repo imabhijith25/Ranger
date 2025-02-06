@@ -1,7 +1,9 @@
+import { useNavigate } from "react-router-dom";
 import { Button } from "../ui/button";
 import { Plus, History, ScanEye, MessageCircle } from "lucide-react";
 
 const Navbar = () => {
+    const navigate = useNavigate();
     return (
         <div className="w-full border-b-1 flex pb-2 justify-between">
             <div className="flex gap-5">
@@ -18,7 +20,12 @@ const Navbar = () => {
                     <MessageCircle size={"20"} />
                 </div>
             </div>
-            <Button size={"xsm"}>
+            <Button
+                size={"xsm"}
+                onClick={() => {
+                    navigate("/mock");
+                }}
+            >
                 {" "}
                 <Plus />
                 Mock New Request

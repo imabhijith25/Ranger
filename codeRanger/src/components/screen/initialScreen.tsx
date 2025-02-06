@@ -17,8 +17,8 @@ const InitialScreen = () => {
     return (
         <>
             <div className="h-svh flex items-center flex-col justify-center min-w-[300px] min-h-[500px]">
-                <p className="text-xl">
-                    Mock Network Calls and Share Responses Securely
+                <p className="text-md p-3 text-center font-extrabold">
+                    Mock Network Calls and Share API data Securely
                 </p>
 
                 <Button
