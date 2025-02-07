@@ -4,6 +4,8 @@ import { Label } from "../ui/label";
 import Navbar from "./navbar";
 import CodeMirror from "@uiw/react-codemirror";
 import { json } from "@codemirror/lang-json";
+import { oneDark } from "@uiw/react-codemirror";
+import { Info } from "lucide-react";
 import {
     Select,
     SelectContent,
@@ -12,12 +14,24 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useState } from "react";
 
 const MockScreen = () => {
     const [mockData, setMockData] = useState({
         statusCode: 200,
         url: "",
+        responseHeaders: [
+            {
+                name: "Content-Type",
+                value: "application/json",
+            },
+        ],
         method: "GET",
         payloadJson: "",
     });
@@ -102,11 +116,82 @@ const MockScreen = () => {
                         </div>
                     </div>
                     <div className="mt-4">
+                        <div className="flex items-center gap-3">
+                            <Label>Response Headers</Label>
+                            <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger>
+                                        <Info color="yellow"></Info>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p>
+                                            Try to set the response header as
+                                            similar to the original API to
+                                            prevent unnecessary errors
+                                        </p>
+                                    </TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
+                        </div>
+                        {mockData.responseHeaders.map((item, index) => (
+                            <div
+                                className="flex items-center gap-2 mt-2"
+                                key={index}
+                            >
+                                <Input
+                                    placeholder="Key"
+                                    onChange={(e) => {
+                                        const temp = [
+                                            ...mockData.responseHeaders,
+                                        ];
+                                        temp[index].name = e.target.value;
+                                        setMockData({
+                                            ...mockData,
+                                            responseHeaders: temp,
+                                        });
+                                    }}
+                                    value={item.name}
+                                ></Input>
+                                <Input
+                                    placeholder="Value"
+                                    value={item.value}
+                                    onChange={(e) => {
+                                        const temp = [
+                                            ...mockData.responseHeaders,
+                                        ];
+                                        temp[index].value = e.target.value;
+                                        setMockData({
+                                            ...mockData,
+                                            responseHeaders: temp,
+                                        });
+                                    }}
+                                ></Input>
+                            </div>
+                        ))}
+                        <div className="flex justify-end">
+                            <Button
+                                variant={"link"}
+                                onClick={() => {
+                                    setMockData({
+                                        ...mockData,
+                                        responseHeaders: [
+                                            ...mockData.responseHeaders,
+                                            { name: "", value: "" },
+                                        ],
+                                    });
+                                }}
+                            >
+                                Add More
+                            </Button>
+                        </div>
+                    </div>
+                    <div>
                         <Label>JSON Response</Label>
                         <div className="bg-inputBg pt-5 pb-5">
                             <CodeMirror
                                 value={mockData.payloadJson}
-                                height="200px"
+                                height="400px"
+                                theme={oneDark}
                                 extensions={[json()]}
                                 onChange={(val) => {
                                     setMockData({
@@ -115,7 +200,6 @@ const MockScreen = () => {
                                     });
                                 }}
                             />
-                            ;
                         </div>
                     </div>
 
@@ -123,7 +207,7 @@ const MockScreen = () => {
                         <Button
                             className="mt-3 "
                             onClick={() => {
-                                console.log(JSON.parse(mockData.payloadJson));
+                                console.log(mockData);
                                 submitMock();
                             }}
                         >

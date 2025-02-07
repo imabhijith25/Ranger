@@ -1,4 +1,17 @@
-export const injectMockScript = (tabId) => {
+const urlInMockData = (url, mockData) => {
+    console.log("checked url", url);
+    for (let i of mockData) {
+        console.log("Entered loop", i);
+        if (i["url"] == url) {
+            return i;
+        }
+    }
+    return false;
+};
+
+export const injectMockScript = async (tabId) => {
+    const mockData = await getDataFromLocalStorage("mocks");
+
     chrome.debugger.attach({ tabId: tabId }, "1.0", () => {
         console.log("Debugger attached!");
         chrome.debugger.sendCommand(
@@ -28,32 +41,19 @@ export const injectMockScript = (tabId) => {
             console.log("Intercepted Request:", request);
 
             // Mock the response for specific URLs
+            const mocks = urlInMockData(request.url, mockData);
+            console.log("mocks", mocks);
             if (
-                request.url.includes(
-                    "https://blr-mirage-reports.home-api.highbond-s1.com/userPreferences"
-                )
+                mocks
+                // request.url.includes(
+                //     "https://blr-mirage-reports.home-api.highbond-s1.com/userPreferences"
+                // )
             ) {
                 const mockResponse = {
-                    responseCode: 200,
+                    responseCode: mocks.statusCode,
 
-                    responseHeaders: [
-                        { name: "Content-Type", value: "application/json" },
-                        {
-                            name: "Access-Control-Allow-Origin",
-                            value: "https://blr-mirage-reports.home.highbond-s1.com",
-                        },
-                        {
-                            name: "Access-Control-Allow-Credentials",
-                            value: "true",
-                        },
-                        {
-                            name: "Access-Control-Allow-Methods",
-                            value: "GET, POST, PUT, DELETE, OPTIONS",
-                        },
-                    ],
-                    body: btoa(
-                        JSON.stringify({ message: "This is a mock response!" })
-                    ),
+                    responseHeaders: [...mocks.responseHeaders],
+                    body: btoa(mocks.payloadJson),
                 };
 
                 // Send the mock response
