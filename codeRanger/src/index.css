@@ -86,3 +86,25 @@
     --chart-5: 340 75% 55%;
   }
 }
+
+/* Custom Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 2px;
+  height: 2px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  /* gray-200 */
+  border-radius: 2px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #19191a;
+  /* blue-500 */
+  border-radius: 2px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #2563eb;
+  /* blue-600 */
+}

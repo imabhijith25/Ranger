@@ -8,7 +8,7 @@ const addListenerForIncomingRequest = (tabId) => {
     chrome.webRequest.onCompleted.addListener(
         (details) => {
             // Save the request details
-
+            console.log("details", details);
             chrome.storage.local.get("tabId").then((result) => {
                 console.log(result.tabId);
                 // console.log("Captured Request:", details);
@@ -16,6 +16,7 @@ const addListenerForIncomingRequest = (tabId) => {
                     url: details.url,
                     method: details.method,
                     statusCode: details.statusCode,
+
                     type: details.type,
                     timestamp: new Date().toISOString(),
                 });
