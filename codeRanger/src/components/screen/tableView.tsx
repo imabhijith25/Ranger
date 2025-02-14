@@ -21,6 +21,29 @@ const TableView = () => {
     const [onlyFetchXhr, setOnlyFetchXhr] = useState<boolean | undefined>(
         false
     );
+
+    // const getDataFromLocalStorage = (key: any) => {
+    //     return new Promise((resolve, reject) => {
+    //         chrome.storage.local.get([key], (result) => {
+    //             if (chrome.runtime.lastError) {
+    //                 console.error(
+    //                     "Error fetching data from storage:",
+    //                     chrome.runtime.lastError
+    //                 );
+    //                 reject(false);
+    //             } else {
+    //                 resolve(result[key]);
+    //             }
+    //         });
+    //     });
+    // };
+
+    // const isUrlPartOfMock = async (url: string) => {
+    //     const isit = await getDataFromLocalStorage(url);
+    //     console.log(isit);
+    //     if (isit) return true;
+    //     return false;
+    // };
     useEffect(() => {
         if (mode == "development") {
             setResponseList([
@@ -36,7 +59,12 @@ const TableView = () => {
                     name: "Mozilla",
                     url: "https://developer.mozilla.org",
                 },
-                { id: 5, name: "Reddit", url: "https://www.reddit.com" },
+                {
+                    id: 5,
+                    name: "Reddit",
+                    url: "https://www.reddit.com",
+                    mocked: true,
+                },
                 { id: 6, name: "YouTube", url: "https://www.youtube.com" },
                 { id: 7, name: "Twitter", url: "https://twitter.com" },
                 { id: 8, name: "LinkedIn", url: "https://www.linkedin.com" },
@@ -46,8 +74,9 @@ const TableView = () => {
                 { id: 12, name: "OpenAI", url: "https://openai.com" },
             ]);
         } else {
-            chrome.runtime.onMessage.addListener((message) => {
+            chrome.runtime.onMessage.addListener(async (message) => {
                 if (message.action == "incomingRequest") {
+                    console.log("the details are", message.detail);
                     setResponseList([...message.detail]);
                 }
             });
@@ -80,7 +109,7 @@ const TableView = () => {
             <div className="flex mt-5">
                 <div className="max-h-[558px] h-[100%] w-[100%] border rounded-tl rounded-bl border-borderBg overflow-y-scroll custom-scrollbar ">
                     <Table>
-                        <TableCaption>
+                        <TableCaption className="mb-4">
                             Refresh the required page to see network calls
                         </TableCaption>
                         <TableHeader>
@@ -95,7 +124,13 @@ const TableView = () => {
                                 )
                                 .map((item: any) => (
                                     <TableRow key={item.url}>
-                                        <TableCell className="font-medium text-green-500">
+                                        <TableCell
+                                            className={
+                                                item?.mocked
+                                                    ? `font-medium text-primary`
+                                                    : `font-medium text-green-500`
+                                            }
+                                        >
                                             {item.url?.slice(0, 70)}
                                         </TableCell>
                                     </TableRow>

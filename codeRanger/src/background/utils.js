@@ -1,12 +1,15 @@
+//if we make this async await will it work>??
 const urlInMockData = (url, mockData) => {
     console.log("checked url", url);
-    for (let i of mockData) {
-        console.log("Entered loop", i);
-        if (i["url"] == url) {
-            return i;
+    return new Promise((resolve, reject) => {
+        for (let i of mockData) {
+            console.log("Entered loop", i, url);
+            if (i["url"] == url) {
+                resolve(i);
+            }
+            reject(false);
         }
-    }
-    return false;
+    });
 };
 
 export const injectMockScript = async (tabId) => {
@@ -31,7 +34,7 @@ export const injectMockScript = async (tabId) => {
         );
         // Enable network monitoring
     });
-    chrome.debugger.onEvent.addListener((source, method, params) => {
+    chrome.debugger.onEvent.addListener(async (source, method, params) => {
         if (source.tabId !== tabId) return;
 
         // Intercept the request
@@ -40,20 +43,20 @@ export const injectMockScript = async (tabId) => {
 
             console.log("Intercepted Request:", request);
 
-            // Mock the response for specific URLs
-            const mocks = urlInMockData(request.url, mockData);
-            console.log("mocks", mocks);
+            console.log(mockData);
+            const isAvailable = mockData.hasOwnProperty(request.url);
+            console.log("isAvailable", isAvailable);
             if (
-                mocks
+                isAvailable
                 // request.url.includes(
                 //     "https://blr-mirage-reports.home-api.highbond-s1.com/userPreferences"
                 // )
             ) {
                 const mockResponse = {
-                    responseCode: mocks.statusCode,
+                    responseCode: mockData[request.url].statusCode,
 
-                    responseHeaders: [...mocks.responseHeaders],
-                    body: btoa(mocks.payloadJson),
+                    responseHeaders: [...mockData[request.url].responseHeaders],
+                    body: btoa(mockData[request.url].payloadJson),
                 };
 
                 // Send the mock response

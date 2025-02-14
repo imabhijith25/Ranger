@@ -43,7 +43,7 @@ const MockScreen = () => {
         method: "GET",
         payloadJson: "",
     });
-    const [mockEnabled, setMockEnabled] = useState(true);
+    const [mockEnabled, setMockEnabled] = useState(false);
 
     const submitMock = () => {
         chrome.runtime
@@ -74,7 +74,7 @@ const MockScreen = () => {
                     <TabsTrigger value="delay">Delay</TabsTrigger>
                 </TabsList>
                 <TabsContent value="info" className="p-3">
-                    <InfoScreen />
+                    <InfoScreen screenType="empty" />
                 </TabsContent>
                 <TabsContent value="mock" className="p-3">
                     {" "}

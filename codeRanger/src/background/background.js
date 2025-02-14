@@ -8,15 +8,14 @@ const addListenerForIncomingRequest = (tabId) => {
     chrome.webRequest.onCompleted.addListener(
         (details) => {
             // Save the request details
-            console.log("details", details);
-            chrome.storage.local.get("tabId").then((result) => {
+            chrome.storage.local.get("tabId").then(async (result) => {
                 console.log(result.tabId);
                 // console.log("Captured Request:", details);
                 capturedRequests.push({
                     url: details.url,
                     method: details.method,
                     statusCode: details.statusCode,
-
+                    mocked: await getDataFromLocalStorage(details.url),
                     type: details.type,
                     timestamp: new Date().toISOString(),
                 });
@@ -66,11 +65,15 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
     if (message.action == "save_mock") {
         //this can only do one at a time, so be careful
         chrome.storage.local.set(
-            { mocks: message.data, startIntercepting: true },
+            {
+                mocks: { [message.data[0].url.trim()]: message.data[0] },
+                startIntercepting: true,
+            },
             async function () {
                 console.log("Mock saved to local storage");
                 const tabId = await getDataFromLocalStorage("tabId");
-                injectMockScript(tabId);
+                console.log("tab id is", tabId);
+                await injectMockScript(tabId);
             }
         );
     }
