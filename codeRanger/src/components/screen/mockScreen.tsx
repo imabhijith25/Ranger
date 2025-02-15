@@ -23,14 +23,29 @@ import {
     TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { toast } from "sonner";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AutoComplete } from "../ui/autocomplete";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { ResponseHeaders } from "@/lib/utils";
 import InfoScreen from "./infoScreen";
+const getDataFromLocalStorage = (key: any) => {
+    return new Promise((resolve, reject) => {
+        chrome.storage.local.get([key], (result) => {
+            if (chrome.runtime.lastError) {
+                console.error(
+                    "Error fetching data from storage:",
+                    chrome.runtime.lastError
+                );
+                reject(new Error("Error fetching data from storage"));
+            } else {
+                resolve(result[key]);
+            }
+        });
+    });
+};
 
-const MockScreen = () => {
+const MockScreen = ({ selectedItem }: any) => {
     const [mockData, setMockData] = useState({
         statusCode: 200,
         url: "",
@@ -44,6 +59,18 @@ const MockScreen = () => {
         payloadJson: "",
     });
     const [mockEnabled, setMockEnabled] = useState(false);
+    useEffect(() => {
+        const isMockedFunction = async () => {
+            const isMocked = await getDataFromLocalStorage(selectedItem.url);
+            if (isMocked) {
+                setMockEnabled(true);
+            } else {
+                setMockEnabled(false);
+            }
+        };
+
+        isMockedFunction();
+    }, [selectedItem]);
 
     const submitMock = () => {
         chrome.runtime
@@ -65,16 +92,16 @@ const MockScreen = () => {
     return (
         <>
             <Tabs
-                defaultValue="info"
+                defaultValue={"mock"}
                 className="w-[100%] border rounded-tr rounded-br border-borderBg pb-2 pt-2"
             >
                 <TabsList className="border-b-2 border-borderBg pb-3">
-                    <TabsTrigger value="info">API Info</TabsTrigger>
                     <TabsTrigger value="mock">Mock</TabsTrigger>
+                    <TabsTrigger value="info">API Info</TabsTrigger>
                     <TabsTrigger value="delay">Delay</TabsTrigger>
                 </TabsList>
                 <TabsContent value="info" className="p-3">
-                    <InfoScreen screenType="empty" />
+                    <InfoScreen selectedItem={selectedItem} />
                 </TabsContent>
                 <TabsContent value="mock" className="p-3">
                     {" "}
@@ -83,6 +110,13 @@ const MockScreen = () => {
                             <p className="font-extrabold mb-4 text-center">
                                 Mock Response
                             </p>
+                            {!selectedItem && (
+                                <p className="mt-4 text-sm text-muted-foreground flex justify-center text-center">
+                                    Please select a URL from the left panel to
+                                    begin mocking an existing request, or create
+                                    a new mock by entering a URL here
+                                </p>
+                            )}
                             {mockEnabled && (
                                 <Alert variant="default" className="mb-4">
                                     <AlertTitle className="font-bold text-md">
@@ -163,7 +197,12 @@ const MockScreen = () => {
                                     <Label htmlFor="url">URL to Mock</Label>
                                     <Input
                                         id="url"
-                                        value={mockData.url}
+                                        disabled={selectedItem}
+                                        value={
+                                            selectedItem
+                                                ? selectedItem.url
+                                                : mockData.url
+                                        }
                                         onChange={(e) => {
                                             setMockData({
                                                 ...mockData,
