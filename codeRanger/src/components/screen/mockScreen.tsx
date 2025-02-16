@@ -46,6 +46,7 @@ const getDataFromLocalStorage = (key: any) => {
 };
 
 const MockScreen = ({ selectedItem }: any) => {
+    const [saveState, setSaveState] = useState("save_mock");
     const [mockData, setMockData] = useState({
         statusCode: 200,
         url: "",
@@ -60,27 +61,51 @@ const MockScreen = ({ selectedItem }: any) => {
     });
     const [mockEnabled, setMockEnabled] = useState(false);
     useEffect(() => {
-        const isMockedFunction = async () => {
-            const isMocked = await getDataFromLocalStorage(selectedItem.url);
-            if (isMocked) {
-                setMockEnabled(true);
-            } else {
-                setMockEnabled(false);
-            }
-        };
+        if (selectedItem) {
+            const isMockedFunction = async () => {
+                const isMocked: any = await getDataFromLocalStorage("mocks");
+                if (isMocked?.hasOwnProperty(selectedItem?.url)) {
+                    setMockEnabled(true);
+                    console.log("Entering this moot");
+                    setMockData({
+                        url: selectedItem?.url,
+                        payloadJson: isMocked[selectedItem?.url].payloadJson,
+                        method: isMocked[selectedItem?.url].method,
+                        responseHeaders:
+                            isMocked[selectedItem?.url].responseHeaders,
+                        statusCode: isMocked[selectedItem?.url].statusCode,
+                    });
+                } else {
+                    setMockEnabled(false);
+                    setMockData({
+                        statusCode: 200,
+                        url: selectedItem?.url,
+                        responseHeaders: [
+                            {
+                                name: "Content-Type",
+                                value: "application/json",
+                            },
+                        ],
+                        method: "GET",
+                        payloadJson: "",
+                    });
+                }
+            };
 
-        isMockedFunction();
+            isMockedFunction();
+        }
     }, [selectedItem]);
 
     const submitMock = () => {
         chrome.runtime
             .sendMessage({
-                action: "save_mock",
+                action: saveState,
                 data: [mockData],
             })
             .then((result) => {
                 console.log(result);
                 setMockEnabled(true);
+                setSaveState("subsequent_mock");
                 window.scrollTo({
                     top: 0,
                     left: 0,
@@ -198,11 +223,7 @@ const MockScreen = ({ selectedItem }: any) => {
                                     <Input
                                         id="url"
                                         disabled={selectedItem}
-                                        value={
-                                            selectedItem
-                                                ? selectedItem.url
-                                                : mockData.url
-                                        }
+                                        value={mockData.url}
                                         onChange={(e) => {
                                             setMockData({
                                                 ...mockData,
