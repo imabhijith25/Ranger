@@ -46,7 +46,6 @@ const getDataFromLocalStorage = (key: any) => {
 };
 
 const MockScreen = ({ selectedItem }: any) => {
-    const [saveState, setSaveState] = useState("save_mock");
     const [mockData, setMockData] = useState({
         statusCode: 200,
         url: "",
@@ -60,12 +59,28 @@ const MockScreen = ({ selectedItem }: any) => {
         payloadJson: "",
     });
     const [mockEnabled, setMockEnabled] = useState(false);
+
+    useEffect(() => {
+        chrome.runtime.onMessage.addListener(async (message) => {
+            if (message.action == "debugger_disabled") {
+                setMockEnabled(false);
+                toast("Debugger Disabled", {
+                    description:
+                        "Mocking is disabled as you have disabled the debugger. Restart the extension again",
+                });
+            }
+        });
+    }, []);
     useEffect(() => {
         if (selectedItem) {
             const isMockedFunction = async () => {
                 const isMocked: any = await getDataFromLocalStorage("mocks");
+                const isDebuggerEnabled = await getDataFromLocalStorage(
+                    "startIntercepting"
+                );
                 if (isMocked?.hasOwnProperty(selectedItem?.url)) {
-                    setMockEnabled(true);
+                    if (isDebuggerEnabled) setMockEnabled(true);
+
                     console.log("Entering this moot");
                     setMockData({
                         url: selectedItem?.url,
@@ -99,13 +114,12 @@ const MockScreen = ({ selectedItem }: any) => {
     const submitMock = () => {
         chrome.runtime
             .sendMessage({
-                action: saveState,
+                action: "save_mock",
                 data: [mockData],
             })
             .then((result) => {
-                console.log(result);
+                console.log("response", result);
                 setMockEnabled(true);
-                setSaveState("subsequent_mock");
                 window.scrollTo({
                     top: 0,
                     left: 0,
