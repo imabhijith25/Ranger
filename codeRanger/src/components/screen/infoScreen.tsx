@@ -1,5 +1,5 @@
-const InfoScreen = ({ screenType }: any) => {
-    if (screenType == "empty") {
+const InfoScreen = ({ selectedItem }: any) => {
+    if (!selectedItem) {
         return (
             <>
                 <div>
@@ -12,7 +12,16 @@ const InfoScreen = ({ screenType }: any) => {
     } else {
         return (
             <>
-                <p>Mock screen</p>
+                {Object.keys(selectedItem).map((item) => (
+                    <div className="flex justify-start gap-10 ">
+                        <div className="text-xs   w-[150px] pb-2">
+                            <p>{item}</p>
+                        </div>
+                        <div className=" max-w-[300px] text-xs overflow-x-scroll w-[100%] custom-scrollbar">
+                            <p>{selectedItem[item]}</p>
+                        </div>
+                    </div>
+                ))}
             </>
         );
     }

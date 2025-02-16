@@ -13,11 +13,13 @@ import { Input } from "@/components/ui/input";
 import { useEffect, useState } from "react";
 import MockScreen from "./mockScreen";
 import { Label } from "../ui/label";
-import { mode } from "@/lib/utils";
+import { mockResponseList, mode } from "@/lib/utils";
 
 const TableView = () => {
     const [responseList, setResponseList] = useState<any[]>([]);
     const [searchItem, setSearchItem] = useState("");
+    const [selectedItem, setSelectedItem] = useState(null);
+    const [newMockStarted, setNewMockStarted] = useState(false);
     const [onlyFetchXhr, setOnlyFetchXhr] = useState<boolean | undefined>(
         false
     );
@@ -45,34 +47,12 @@ const TableView = () => {
     //     return false;
     // };
     useEffect(() => {
+        document.addEventListener("newMock", () => {
+            setNewMockStarted(true);
+            setSelectedItem(null);
+        });
         if (mode == "development") {
-            setResponseList([
-                { id: 1, name: "Google", url: "https://www.google.com" },
-                { id: 2, name: "GitHub", url: "https://www.github.com" },
-                {
-                    id: 3,
-                    name: "Stack Overflow",
-                    url: "https://stackoverflow.com",
-                },
-                {
-                    id: 4,
-                    name: "Mozilla",
-                    url: "https://developer.mozilla.org",
-                },
-                {
-                    id: 5,
-                    name: "Reddit",
-                    url: "https://www.reddit.com",
-                    mocked: true,
-                },
-                { id: 6, name: "YouTube", url: "https://www.youtube.com" },
-                { id: 7, name: "Twitter", url: "https://twitter.com" },
-                { id: 8, name: "LinkedIn", url: "https://www.linkedin.com" },
-                { id: 9, name: "Amazon", url: "https://www.amazon.com" },
-                { id: 10, name: "Netflix", url: "https://www.netflix.com" },
-                { id: 11, name: "Wikipedia", url: "https://www.wikipedia.org" },
-                { id: 12, name: "OpenAI", url: "https://openai.com" },
-            ]);
+            setResponseList(mockResponseList);
         } else {
             chrome.runtime.onMessage.addListener(async (message) => {
                 if (message.action == "incomingRequest") {
@@ -122,23 +102,36 @@ const TableView = () => {
                                 .filter((item: any) =>
                                     item.url.includes(searchItem)
                                 )
-                                .map((item: any) => (
-                                    <TableRow key={item.url}>
+                                .map((item: any, index) => (
+                                    <TableRow key={index}>
                                         <TableCell
-                                            className={
-                                                item?.mocked
-                                                    ? `font-medium text-primary`
-                                                    : `font-medium text-green-500`
-                                            }
+                                            className={`font-extralight text-sm cursor-pointer flex gap-2 items-center`}
+                                            onClick={() => {
+                                                setSelectedItem(item);
+                                                setNewMockStarted(false);
+                                            }}
                                         >
-                                            {item.url?.slice(0, 70)}
+                                            {item.statusCode == 200 ? (
+                                                <>
+                                                    <div className="w-[10px] h-[10px] bg-green-500 rounded-full flex-none"></div>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <div className="w-[10px] h-[10px] bg-red-500 rounded-full flex-none"></div>
+                                                </>
+                                            )}
+                                            {item.url}
                                         </TableCell>
                                     </TableRow>
                                 ))}
                         </TableBody>
                     </Table>
                 </div>
-                <MockScreen />
+                <MockScreen
+                    selectedItem={selectedItem}
+                    newMockStarted={newMockStarted}
+                    setNewMockStarted={setNewMockStarted}
+                />
             </div>
         </div>
     );

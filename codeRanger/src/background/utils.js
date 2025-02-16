@@ -12,28 +12,31 @@ const urlInMockData = (url, mockData) => {
     });
 };
 
-export const injectMockScript = async (tabId) => {
+export const injectMockScript = async (tabId, attach) => {
     const mockData = await getDataFromLocalStorage("mocks");
 
-    chrome.debugger.attach({ tabId: tabId }, "1.0", () => {
-        console.log("Debugger attached!");
-        chrome.debugger.sendCommand(
-            { tabId },
-            "Fetch.enable",
-            {
-                patterns: [
-                    {
-                        urlPattern: "*", // Intercept all requests
-                        requestStage: "Request", // Intercept at the request stage
-                    },
-                ],
-            },
-            () => {
-                console.log("Fetch interception enabled");
-            }
-        );
-        // Enable network monitoring
-    });
+    if (attach) {
+        chrome.debugger.attach({ tabId: tabId }, "1.0", () => {
+            console.log("Debugger attached!");
+            chrome.debugger.sendCommand(
+                { tabId },
+                "Fetch.enable",
+                {
+                    patterns: [
+                        {
+                            urlPattern: "*", // Intercept all requests
+                            requestStage: "Request", // Intercept at the request stage
+                        },
+                    ],
+                },
+                () => {
+                    console.log("Fetch interception enabled");
+                }
+            );
+            // Enable network monitoring
+        });
+    }
+
     chrome.debugger.onEvent.addListener(async (source, method, params) => {
         if (source.tabId !== tabId) return;
 
@@ -107,37 +110,6 @@ statusCode:200
 }]}
 
 */
-
-const isUrlPartOfMock = (mockedUrlValues, url) => {
-    for (const mocks of mockedUrlValues) {
-        console.log("Mock loop", mocks);
-        if (mocks["url"].includes(url)) {
-            return mocks;
-        }
-    }
-};
-
-// Function to mock a response
-function mockResponse(tabId, requestUrl, id) {
-    console.log("started mocking", tabId, requestUrl, id);
-    const response = {
-        body: JSON.stringify({ message: "This is a mocked response!" }),
-        status: 200,
-        contentType: "application/json",
-    };
-
-    // Send the mocked response back to the browser
-    chrome.debugger.sendCommand({ tabId: tabId }, "Fetch.fulfillRequest", {
-        requestId: id,
-        responseCode: 200,
-        body: btoa(
-            "HTTP/1.1 200 OK\r\n" +
-                "Content-Type: application/json\r\n" +
-                "\r\n" +
-                JSON.stringify({ message: "This is a mock response!" })
-        ),
-    });
-}
 
 export const getDataFromLocalStorage = (key) => {
     return new Promise((resolve, reject) => {
