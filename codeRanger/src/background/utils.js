@@ -1,41 +1,23 @@
-//if we make this async await will it work>??
-const urlInMockData = (url, mockData) => {
-    console.log("checked url", url);
-    return new Promise((resolve, reject) => {
-        for (let i of mockData) {
-            console.log("Entered loop", i, url);
-            if (i["url"] == url) {
-                resolve(i);
+export const injectMockScript = async (tabId) => {
+    chrome.debugger.attach({ tabId: tabId }, "1.0", () => {
+        console.log("Debugger attached!");
+        chrome.debugger.sendCommand(
+            { tabId },
+            "Fetch.enable",
+            {
+                patterns: [
+                    {
+                        urlPattern: "*", // Intercept all requests
+                        requestStage: "Request", // Intercept at the request stage
+                    },
+                ],
+            },
+            () => {
+                console.log("Fetch interception enabled");
             }
-            reject(false);
-        }
+        );
+        // Enable network monitoring
     });
-};
-
-export const injectMockScript = async (tabId, attach) => {
-    const mockData = await getDataFromLocalStorage("mocks");
-
-    if (attach) {
-        chrome.debugger.attach({ tabId: tabId }, "1.0", () => {
-            console.log("Debugger attached!");
-            chrome.debugger.sendCommand(
-                { tabId },
-                "Fetch.enable",
-                {
-                    patterns: [
-                        {
-                            urlPattern: "*", // Intercept all requests
-                            requestStage: "Request", // Intercept at the request stage
-                        },
-                    ],
-                },
-                () => {
-                    console.log("Fetch interception enabled");
-                }
-            );
-            // Enable network monitoring
-        });
-    }
 
     chrome.debugger.onEvent.addListener(async (source, method, params) => {
         if (source.tabId !== tabId) return;
@@ -46,18 +28,15 @@ export const injectMockScript = async (tabId, attach) => {
 
             console.log("Intercepted Request:", request);
 
+            // Fetch the latest mock data from local storage
+            const mockData = await getDataFromLocalStorage("mocks");
+
             console.log(mockData);
             const isAvailable = mockData.hasOwnProperty(request.url);
             console.log("isAvailable", isAvailable);
-            if (
-                isAvailable
-                // request.url.includes(
-                //     "https://blr-mirage-reports.home-api.highbond-s1.com/userPreferences"
-                // )
-            ) {
+            if (isAvailable) {
                 const mockResponse = {
                     responseCode: mockData[request.url].statusCode,
-
                     responseHeaders: [...mockData[request.url].responseHeaders],
                     body: btoa(mockData[request.url].payloadJson),
                 };
